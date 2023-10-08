@@ -154,7 +154,7 @@ def eva3(y_true, y_pred,epoch=0):
 
 
     print('epoch:{},acc:{:.4f}, nmi:{:.4f}, ari:{:.4f}'.format(epoch,acc,nmi,ari))
-    return acc
+    return nmi
 
 def evaaec(y_true, y_pred):
     # acc, f1 = cluster_acc(y_true, y_pred)
