@@ -1,5 +1,5 @@
-# IMAE-DEDC
-IMAE-DEDC implement
+# DEDC-IMAE
+DEDC-IMAE implement
 
 This is code that accompanies the paper titled "DEDC-IMAE: a deep evolutionary document
 clustering model with inherited mixed autoencoder" by Hui Lu Ruizhang Huang etc. 
@@ -20,5 +20,5 @@ Adaptable to all evolved text datasets.
 
 To Run
 pretrain->IMAE
-train—>DDDC
+train—>DEDC
 
