@@ -20,16 +20,13 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-TOPIC_NUM = 3
-PRETRAIN_N_CLUSTERS = 3
-
 
 class IMAE(nn.Module):
 
     def __init__(self, n_enc_1, n_enc_2, n_enc_3, n_dec_1, n_dec_2, n_dec_3, n_input, n_z):
 
         super(IMAE, self).__init__()
-        self.topic_num = TOPIC_NUM
+        self.topic_num = args.topic_num
 
         text_to_hideen = []
         for i in range(self.topic_num):
@@ -156,7 +153,7 @@ def pretrain_IMAE(model, time, dataset, y, inherit, kmeans_mu_history):
             re_loss = F.mse_loss(x_bar, x)
 
             if inherit != 0:
-                ma_loss = compute_match_loss(Muti_C, kmeans_mu_history, device)  # list3,ndarray(3,10)
+                ma_loss = compute_match_loss(Muti_C, kmeans_mu_history, device)
                 loss = 1 * re_loss + 0.1 * ma_loss
                 # loss = 1 * re_loss
             else:
@@ -173,10 +170,10 @@ def pretrain_IMAE(model, time, dataset, y, inherit, kmeans_mu_history):
             loss = F.mse_loss(x_bar, x)
             # print('{} loss: {}'.format(epoch, loss))
             if len(kmeans_mu_history) == 0:
-                kmeans = KMeans(n_clusters=PRETRAIN_N_CLUSTERS, n_init=30, random_state=42).fit(
+                kmeans = KMeans(n_clusters=n_clusters, n_init=30, random_state=42).fit(
                     Mixed_z.data.cpu().numpy())
             else:
-                kmeans = KMeans(n_clusters=PRETRAIN_N_CLUSTERS, n_init=30, random_state=42, init=kmeans_mu_history).fit(
+                kmeans = KMeans(n_clusters=n_clusters, n_init=30, random_state=42, init=kmeans_mu_history).fit(
                     Mixed_z.data.cpu().numpy())
             center = kmeans.cluster_centers_
             acc = eva3(y, kmeans.labels_, epoch)
@@ -220,7 +217,7 @@ def train_dedc(time, dataset, y, inherit, kmeans_mu_history, device):
     # train_loader = DataLoader(dataset, batch_size=32, shuffle=True)
     # print(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    scheduler = StepLR(optimizer, step_size=40, gamma=0.5)  # 每step_size个epoch将学习率缩小一半
+    scheduler = StepLR(optimizer, step_size=40, gamma=0.5)
     # cluster parameter initiate
     data = torch.Tensor(dataset.x).to(device)
     train_loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
@@ -300,13 +297,13 @@ def train_dedc(time, dataset, y, inherit, kmeans_mu_history, device):
         # ce_loss = F.kl_div(pred.log(), p, reduction='batchmean')
         re_loss = F.mse_loss(Xbar, data)
         if inherit != 0:
-            ma_loss = compute_match_loss(model.cluster_layer.data, kmeans_mu_history, device)  # list3,ndarray(3,10)
+            ma_loss = compute_match_loss(model.cluster_layer.data, kmeans_mu_history, device)
 
-            loss = args.kl_weight * kl_loss + args.re_weight * re_loss + args.ma_weight * ma_loss  # DEDC
+            loss = args.kl_weight * kl_loss + args.re_weight * re_loss + args.ma_weight * ma_loss
 
         else:
             # loss = 0.01 * kl_loss + 1*re_loss
-            loss = args.kl_weight * kl_loss + args.re_weight * re_loss  # imae
+            loss = args.kl_weight * kl_loss + args.re_weight * re_loss
 
         optimizer.zero_grad()
 
@@ -398,7 +395,7 @@ if __name__ == '__main__':
     second = datetime.datetime.now().timestamp()
     dataset_name = 'NCA'
     PRETRAIN = True
-    use_log(flag=False, log_time=time_now)
+    use_log(flag=True, log_time=time_now)
     # while True:
     for time in range(3, 4):  # time:1-4
 
@@ -438,6 +435,6 @@ if __name__ == '__main__':
             kmeans_mu_history = []
         else:
             inherit = 1
-            with open(f'lab/inherit/{dataset_name}/inherit_topic{time - 1}.pkl', 'rb') as f:  # 预训练的
-                kmeans_mu_history = pickle.load(f)  # 加载历史聚类信息
+            with open(f'lab/inherit/{dataset_name}/inherit_topic{time - 1}.pkl', 'rb') as f:
+                kmeans_mu_history = pickle.load(f)
         train_dedc(time, dataset, y, inherit, kmeans_mu_history, device)
