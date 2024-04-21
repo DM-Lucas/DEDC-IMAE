@@ -8,11 +8,10 @@ from sklearn import metrics
 
 
 def cluster_nmi1(y_true,y_pred):
-    #样本点数
     toty_truel = len(y_true)
     y_true_ids = set(y_true)
     y_pred_ids = set(y_pred)
-    #互信息计算
+
     MI = 0
     eps = 1.4e-45
     for idy_true in y_true_ids:
@@ -24,7 +23,7 @@ def cluster_nmi1(y_true,y_pred):
             py = 1.0*len(idy_predOccur[0])/toty_truel
             pxy = 1.0*len(idy_truey_predOccur)/toty_truel
             MI = MI + pxy*math.log(pxy/(px*py)+eps,2)
-    # 标准化互信息
+
     Hx = 0
     for idy_true in y_true_ids:
         idy_trueOccurCount = 1.0*len(np.where(y_true==idy_true)[0])
@@ -151,7 +150,7 @@ def eva3(y_true, y_pred,epoch=0):
 
 
     print('epoch:{},acc:{:.4f}, nmi:{:.4f}, ari:{:.4f}'.format(epoch,acc,nmi,ari))
-    return nmi
+    return acc
 
 def evaaec(y_true, y_pred):
     # acc, f1 = cluster_acc(y_true, y_pred)
